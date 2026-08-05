@@ -24,7 +24,7 @@ var SM={
     {l:'Detalles finales',s:'Publicaci\u00f3n, notas, T&C'}
   ]
 };
-
+var SUBMISSION_ID = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())+Math.random());
 var T={
   en:{
     topbarLabel:'Website questionnaire',
@@ -618,24 +618,25 @@ function setup(){
   }
 }
 
-// Google Apps Script Web App endpoint (deployed from the destination Sheet).
-// Replace PASTE_WEB_APP_URL_HERE with the URL Apps Script gives you after deploying.
-var FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzFpQxIjf2dZ0DwAtYp7IU6P008zFbPRzZEbeEwKQRFW4MxUqbhPAHvC3VhWOau0ZSguw/exec';
+var submitting = false;
 
 document.getElementById('wf').addEventListener('submit', function(e) {
   e.preventDefault();
+  if (submitting) return;
   if (!validate()) return;
+  submitting = true;
+
   var form = this;
   var btn = $('btnSubmit');
-  btn.disabled = true;
-  btn.querySelector('span').textContent = lang === 'es' ? 'Enviando\u2026' : 'Sending\u2026';
+  var sn = $('stickyNext');
 
-  // Build a plain object from the form. For checkboxes, an unchecked box
-  // simply won't appear in FormData, so the Sheet cell stays blank.
+  btn.disabled = true;
+  if (sn) sn.style.pointerEvents = 'none';
+  btn.querySelector('span').textContent = lang === 'es' ? 'Enviando…' : 'Sending…';
+
   var fd = new FormData(form);
   var payload = {};
   fd.forEach(function(value, key) {
-    // Handle repeated keys (multi-select checkboxes) by joining with "; "
     if (payload[key] != null) {
       payload[key] = payload[key] + '; ' + value;
     } else {
@@ -643,18 +644,18 @@ document.getElementById('wf').addEventListener('submit', function(e) {
     }
   });
   payload._lang = lang;
+  payload._submissionId = SUBMISSION_ID;
 
   function fail() {
+    submitting = false;
     btn.disabled = false;
+    if (sn) sn.style.pointerEvents = '';
     btn.querySelector('span').textContent = lang === 'es' ? 'Enviar cuestionario' : 'Submit questionnaire';
     alert(lang === 'es' ? 'Hubo un error al enviar. Por favor intente de nuevo.' : 'There was an error submitting. Please try again.');
   }
 
   fetch(FORM_ENDPOINT, {
     method: 'POST',
-    // No custom Content-Type header — that would trigger a CORS preflight
-    // that Apps Script doesn't handle. text/plain is the sweet spot;
-    // Apps Script reads e.postData.contents as the raw string either way.
     body: JSON.stringify(payload)
   }).then(function(r){
     return r.text().then(function(txt){
