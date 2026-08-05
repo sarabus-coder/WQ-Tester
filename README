@@ -5,7 +5,7 @@ Repository for test scripts and experiments.
 ## Setup
 
 ```bash
-git clone <repo-url>
+git clone <https://github.com/sarabus-coder/WQ-Tester>
 cd testing-repo
 ```
 
