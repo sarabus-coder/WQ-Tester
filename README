@@ -1,0 +1,27 @@
+# Testing Repo
+
+Repository for test scripts and experiments.
+
+## Setup
+
+```bash
+git clone <repo-url>
+cd testing-repo
+```
+
+## Usage
+
+Add instructions here as the repo grows.
+
+## Structure
+
+```
+.
+├── tests/
+├── scripts/
+└── README.md
+```
+
+## License
+
+TBD
