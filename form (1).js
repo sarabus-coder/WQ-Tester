@@ -618,6 +618,7 @@ function setup(){
   }
 }
 
+var FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzFpQxIjf2dZ0DwAtYp7IU6P008zFbPRzZEbeEwKQRFW4MxUqbhPAHvC3VhWOau0ZSguw/exec';
 var submitting = false;
 
 document.getElementById('wf').addEventListener('submit', function(e) {
