@@ -618,7 +618,7 @@ function setup(){
   }
 }
 
-var FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzFpQxIjf2dZ0DwAtYp7IU6P008zFbPRzZEbeEwKQRFW4MxUqbhPAHvC3VhWOau0ZSguw/exec';
+var FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbz_ZmJJHR_gMu-MI5f7Dv1iJoDeSsH0CsMBZTatUFksEQKj326-rH5mYe7_cAFX1a3KKw/exec';
 var submitting = false;
 
 document.getElementById('wf').addEventListener('submit', function(e) {
