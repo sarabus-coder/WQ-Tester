@@ -630,7 +630,6 @@ document.getElementById('wf').addEventListener('submit', function(e) {
   var form = this;
   var btn = $('btnSubmit');
   var sn = $('stickyNext');
-
   btn.disabled = true;
   if (sn) sn.style.pointerEvents = 'none';
   btn.querySelector('span').textContent = lang === 'es' ? 'Enviando…' : 'Sending…';
@@ -638,11 +637,7 @@ document.getElementById('wf').addEventListener('submit', function(e) {
   var fd = new FormData(form);
   var payload = {};
   fd.forEach(function(value, key) {
-    if (payload[key] != null) {
-      payload[key] = payload[key] + '; ' + value;
-    } else {
-      payload[key] = value;
-    }
+    payload[key] = payload[key] != null ? payload[key] + '; ' + value : value;
   });
   payload._lang = lang;
   payload._submissionId = SUBMISSION_ID;
@@ -655,22 +650,40 @@ document.getElementById('wf').addEventListener('submit', function(e) {
     alert(lang === 'es' ? 'Hubo un error al enviar. Por favor intente de nuevo.' : 'There was an error submitting. Please try again.');
   }
 
-  fetch(FORM_ENDPOINT, {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  }).then(function(r){
-    return r.text().then(function(txt){
-      var j;
-      try { j = JSON.parse(txt); } catch(e) { j = {}; }
-      return { ok: r.ok && j.ok !== false, json: j };
-    });
-  }).then(function(res) {
-    if (res.ok) {
+  var settled = false;
+  var timeoutId = setTimeout(function() {
+    if (!settled) { settled = true; fail(); }
+  }, 15000);
+
+  function onMessage(ev) {
+    if (settled) return;
+    var data = ev.data;
+    if (!data || typeof data.ok === 'undefined') return; // ignore unrelated messages
+    settled = true;
+    clearTimeout(timeoutId);
+    window.removeEventListener('message', onMessage);
+    if (data.ok) {
       window.location.href = 'https://andresaromeroa1985.github.io/sd-wdd-wq/thanks.html?lang=' + lang;
     } else {
       fail();
     }
-  }).catch(fail);
+  }
+  window.addEventListener('message', onMessage);
+
+  var tempForm = document.createElement('form');
+  tempForm.method = 'POST';
+  tempForm.action = FORM_ENDPOINT;
+  tempForm.target = 'hidden-submit-frame';
+  tempForm.style.display = 'none';
+
+  var input = document.createElement('input');
+  input.name = 'payload';
+  input.value = JSON.stringify(payload);
+  tempForm.appendChild(input);
+
+  document.body.appendChild(tempForm);
+  tempForm.submit();
+  document.body.removeChild(tempForm);
 });
 
 setup();
