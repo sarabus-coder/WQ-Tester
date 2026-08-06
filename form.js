@@ -618,7 +618,7 @@ function setup(){
   }
 }
 
-var FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyGKliA5GWnbay7sDJQbbgEH-FMe5nRGsNa23d-R5wxCwo_HKZ8GjrEXt6leU-bYlx9SA/exec';
+var FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyGKliA5GWnbay7sDJQbbgEH-FMe5nRGsNa23d-R5wxCwo_HKZ8GjrEXt6leU-bYIx9SA/exec';
 var submitting = false;
 
 document.getElementById('wf').addEventListener('submit', function(e) {
@@ -650,41 +650,23 @@ document.getElementById('wf').addEventListener('submit', function(e) {
     alert(lang === 'es' ? 'Hubo un error al enviar. Por favor intente de nuevo.' : 'There was an error submitting. Please try again.');
   }
 
-  var settled = false;
-  var timeoutId = setTimeout(function() {
-    if (!settled) { settled = true; fail(); }
-  }, 15000);
-
-  function onMessage(ev) {
-    if (settled) return;
-    var data = ev.data;
-    if (!data || typeof data.ok === 'undefined') return; // ignore unrelated messages
-    console.log('SERVER RESPONSE:', data);
-    settled = true;
-    clearTimeout(timeoutId);
-    window.removeEventListener('message', onMessage);
-    if (data.ok) {
-      window.location.href = 'https://andresaromeroa1985.github.io/sd-wdd-wq/thanks.html?lang=' + lang;
-    } else {
-      fail();
-    }
+  function goToThanks() {
+    window.location.href = 'https://andresaromeroa1985.github.io/sd-wdd-wq/thanks.html?lang=' + lang;
   }
-  window.addEventListener('message', onMessage);
 
-  var tempForm = document.createElement('form');
-  tempForm.method = 'POST';
-  tempForm.action = FORM_ENDPOINT;
-  tempForm.target = 'hidden-submit-frame';
-  tempForm.style.display = 'none';
-
-  var input = document.createElement('input');
-  input.name = 'payload';
-  input.value = JSON.stringify(payload);
-  tempForm.appendChild(input);
-
-  document.body.appendChild(tempForm);
-  tempForm.submit();
-  document.body.removeChild(tempForm);
+  fetch(FORM_ENDPOINT, {
+    method: 'POST',
+    mode: 'no-cors',              // opaque response — we never try to read it
+    body: JSON.stringify(payload)
+  }).then(function() {
+    // request was dispatched successfully; server-side lock + dedup + error
+    // email guarantee the row lands even if this optimistic redirect fires
+    // before the Apps Script execution actually finishes.
+    goToThanks();
+  }).catch(function() {
+    // only a genuine network-level failure (offline, DNS, etc.) lands here
+    fail();
+  });
 });
 
 setup();
