@@ -656,15 +656,11 @@ document.getElementById('wf').addEventListener('submit', function(e) {
 
   fetch(FORM_ENDPOINT, {
     method: 'POST',
-    mode: 'no-cors',              // opaque response — we never try to read it
+    mode: 'no-cors',
     body: JSON.stringify(payload)
   }).then(function() {
-    // request was dispatched successfully; server-side lock + dedup + error
-    // email guarantee the row lands even if this optimistic redirect fires
-    // before the Apps Script execution actually finishes.
     goToThanks();
   }).catch(function() {
-    // only a genuine network-level failure (offline, DNS, etc.) lands here
     fail();
   });
 });
