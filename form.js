@@ -659,6 +659,7 @@ document.getElementById('wf').addEventListener('submit', function(e) {
     if (settled) return;
     var data = ev.data;
     if (!data || typeof data.ok === 'undefined') return; // ignore unrelated messages
+    console.log('SERVER RESPONSE:', data);
     settled = true;
     clearTimeout(timeoutId);
     window.removeEventListener('message', onMessage);
